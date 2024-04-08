@@ -1,15 +1,25 @@
 package authController
 
 import (
+	userServiceContract "github.com/dealense7/documentSignatures/app/contracts/services/user"
+	"github.com/dealense7/documentSignatures/app/v1/services/auth"
 	"github.com/dealense7/documentSignatures/initializers"
-	"github.com/dealense7/documentSignatures/requests"
-	authRequest "github.com/dealense7/documentSignatures/requests/auth"
-	userService "github.com/dealense7/documentSignatures/services/user"
+	"github.com/dealense7/documentSignatures/validation/requests"
+	"github.com/dealense7/documentSignatures/validation/requests/v1/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func SignUp(c *gin.Context) {
+type AuthController struct {
+	service userServiceContract.UserServiceContract
+}
+
+func NewAuthController() *AuthController {
+	service := userServiceContract.NewUserService()
+	return &AuthController{service: service}
+}
+
+func (ac *AuthController) SignUp(c *gin.Context) {
 
 	var request authRequest.UserRegistrationRequest
 
@@ -23,7 +33,7 @@ func SignUp(c *gin.Context) {
 	}
 
 	// Create
-	item, createErr := userService.Create(request)
+	item, createErr := ac.service.Create(request)
 
 	if createErr != nil {
 		c.AbortWithStatusJSON(createErr.GetCode(), createErr.GetMessage())
@@ -36,7 +46,7 @@ func SignUp(c *gin.Context) {
 	})
 }
 
-func Auth(c *gin.Context) {
+func (ac *AuthController) Auth(c *gin.Context) {
 	var request authRequest.AuthRequest
 
 	// Validate
@@ -49,7 +59,7 @@ func Auth(c *gin.Context) {
 	}
 
 	// Authorize
-	tokenString, authErr := userService.Authorize(request)
+	tokenString, authErr := authService.Authorize(request)
 	if authErr != nil {
 		c.AbortWithStatusJSON(authErr.GetCode(), authErr.GetMessage())
 		return
@@ -61,7 +71,7 @@ func Auth(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func GetMe(c *gin.Context) {
+func (ac *AuthController) GetMe(c *gin.Context) {
 	user := initializers.AuthUser
 
 	c.JSON(http.StatusOK, gin.H{

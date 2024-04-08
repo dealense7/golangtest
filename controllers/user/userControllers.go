@@ -1,16 +1,25 @@
 package user
 
 import (
-	"github.com/dealense7/documentSignatures/requests"
-	userRequest "github.com/dealense7/documentSignatures/requests/user"
-	userService "github.com/dealense7/documentSignatures/services/user"
+	userServiceContract "github.com/dealense7/documentSignatures/app/contracts/services/user"
+	"github.com/dealense7/documentSignatures/validation/requests"
+	"github.com/dealense7/documentSignatures/validation/requests/v1/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
-func FindItems(c *gin.Context) {
-	items, err := userService.FindItems()
+type UsersController struct {
+	service userServiceContract.UserServiceContract
+}
+
+func NewUserController() *UsersController {
+	service := userServiceContract.NewUserService()
+	return &UsersController{service: service}
+}
+
+func (uc *UsersController) FindItems(c *gin.Context) {
+	items, err := uc.service.FindItems()
 
 	if err != nil {
 		c.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -22,10 +31,10 @@ func FindItems(c *gin.Context) {
 	})
 }
 
-func Show(c *gin.Context) {
+func (uc *UsersController) Show(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	item, err := userService.FindByIdOrFail(id)
+	item, err := uc.service.FindByIdOrFail(id)
 
 	if err != nil {
 		c.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -37,11 +46,11 @@ func Show(c *gin.Context) {
 	})
 }
 
-func Update(c *gin.Context) {
+func (uc *UsersController) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// Find Item to Update
-	item, err := userService.FindByIdOrFail(id)
+	item, err := uc.service.FindByIdOrFail(id)
 
 	if err != nil {
 		c.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -60,7 +69,7 @@ func Update(c *gin.Context) {
 	}
 
 	// Update
-	err = userService.Update(item, request)
+	err = uc.service.Update(item, request)
 
 	if err != nil {
 		c.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -72,11 +81,11 @@ func Update(c *gin.Context) {
 	})
 }
 
-func Delete(c *gin.Context) {
+func (uc *UsersController) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// Find Item to Update
-	item, err := userService.FindByIdOrFail(id)
+	item, err := uc.service.FindByIdOrFail(id)
 
 	if err != nil {
 		c.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -84,7 +93,7 @@ func Delete(c *gin.Context) {
 	}
 
 	// Delete
-	userService.Delete(item)
+	uc.service.Delete(item)
 
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "Item Deleted",

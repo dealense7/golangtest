@@ -1,8 +1,8 @@
 package seeds
 
 import (
+	models2 "github.com/dealense7/documentSignatures/app/models"
 	"github.com/dealense7/documentSignatures/initializers"
-	"github.com/dealense7/documentSignatures/models"
 )
 
 func AclSeed() {
@@ -12,8 +12,8 @@ func AclSeed() {
 		permissions map[string]string
 	}
 
-	var items = map[models.PermissionScope]Acl{
-		&models.User{}: {
+	var items = map[models2.PermissionScope]Acl{
+		&models2.User{}: {
 			title: "Manage User",
 			permissions: map[string]string{
 				"view":   "View Users",
@@ -23,11 +23,11 @@ func AclSeed() {
 		},
 	}
 
-	var admin models.User
-	initializers.DB.First(&admin, "email = ?", models.AdminEmail)
+	var admin models2.User
+	initializers.DB.First(&admin, "email = ?", models2.AdminEmail)
 
 	for model, value := range items {
-		role := models.Role{Name: value.title}
+		role := models2.Role{Name: value.title}
 
 		scope := model.GetScope()
 
@@ -36,10 +36,10 @@ func AclSeed() {
 		for name, desc := range value.permissions {
 			// generate name
 			permissionName := scope + "." + name
-			permission := models.Permission{Name: permissionName, Description: desc}
+			permission := models2.Permission{Name: permissionName, Description: desc}
 
 			// create permission
-			initializers.DB.Where(models.Permission{Name: permissionName}).FirstOrCreate(&permission)
+			initializers.DB.Where(models2.Permission{Name: permissionName}).FirstOrCreate(&permission)
 
 			// append
 			initializers.DB.Model(&role).Association("Permissions").Append(&permission)

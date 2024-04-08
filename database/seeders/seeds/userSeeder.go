@@ -1,8 +1,8 @@
 package seeds
 
 import (
+	"github.com/dealense7/documentSignatures/app/models"
 	"github.com/dealense7/documentSignatures/initializers"
-	"github.com/dealense7/documentSignatures/models"
 	"github.com/jaswdr/faker/v2"
 	"golang.org/x/crypto/bcrypt"
 )
